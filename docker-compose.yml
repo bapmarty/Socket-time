@@ -3,31 +3,68 @@ version: '3.5'
 services:
   server:
     build: ./server
-    ports:
-      - ${SERVER_PORT}:${SERVER_PORT}
     environment:
       SERVER_PORT: ${SERVER_PORT}
     volumes:
       - ./server/:/usr/src/
       - ./server/package.json:/usr/src/package.json
       - /usr/src/node_modules
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "traefik_network"
+      traefik.http.services.stimebaptistemrtfr.loadbalancer.server.port: "5001"
+      #HTTP
+      traefik.http.routers.server-stimebaptistemrtfr.entrypoints: "http"
+      traefik.http.routers.server-stimebaptistemrtfr.rule: "Host(`stime.baptistemrt.fr`)"
+      traefik.http.routers.server-stimebaptistemrtfr.middlewares: redirect-https
+      #HTTPS
+      traefik.http.routers.server-stimebaptistemrtfr-secure.entrypoints: "https"
+      traefik.http.routers.server-stimebaptistemrtfr-secure.rule: "Host(`stime.baptistemrt.fr`)"
+      #TLS
+      traefik.http.routers.server-stimebaptistemrtfr-secure.tls: "true"
+      traefik.http.routers.server-stimebaptistemrtfr-secure.tls.certresolver: "le-baptistemrt"
+      traefik.http.routers.server-stimebaptistemrtfr-secure.tls.domains[0].main: "baptistemrt.fr"
+      traefik.http.routers.server-stimebaptistemrtfr-secure.tls.domains[0].sans: "stime.baptistemrt.fr"
+      #Redirect https
+      traefik.http.middlewares.redirect-https.redirectscheme.scheme: "https"
+      traefik.http.middlewares.redirect-https.redirectscheme.permanent: "true"
     networks:
+      - traefik_network
       - socket-time
 
   app:
     build: ./app
-    ports:
-      - ${APP_PORT}:3000
     environment:
       SERVER_PORT: ${SERVER_PORT}
-      APP_PORT: ${APP_PORT}
     volumes:
       - ./app/:/usr/src/
       - ./app/package.json:/usr/src/package.json
       - /usr/src/node_modules
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "traefik_network"
+      traefik.http.services.timebaptistemrtfr.loadbalancer.server.port: "3000"
+      #HTTP
+      traefik.http.routers.app-timebaptistemrtfr.entrypoints: "http"
+      traefik.http.routers.app-timebaptistemrtfr.rule: "Host(`time.baptistemrt.fr`)"
+      traefik.http.routers.app-timebaptistemrtfr.middlewares: redirect-https
+      #HTTPS
+      traefik.http.routers.app-timebaptistemrtfr-secure.entrypoints: "https"
+      traefik.http.routers.app-timebaptistemrtfr-secure.rule: "Host(`time.baptistemrt.fr`)"
+      #TLS
+      traefik.http.routers.app-timebaptistemrtfr-secure.tls: "true"
+      traefik.http.routers.app-timebaptistemrtfr-secure.tls.certresolver: "le-baptistemrt"
+      traefik.http.routers.app-timebaptistemrtfr-secure.tls.domains[0].main: "baptistemrt.fr"
+      traefik.http.routers.app-timebaptistemrtfr-secure.tls.domains[0].sans: "time.baptistemrt.fr"
+      #Redirect https
+      traefik.http.middlewares.redirect-https.redirectscheme.scheme: "https"
+      traefik.http.middlewares.redirect-https.redirectscheme.permanent: "true"
     networks:
+      - traefik_network
       - socket-time
 
 networks:
+  traefik_network:
+    external: true
   socket-time:
     name: socket-time
