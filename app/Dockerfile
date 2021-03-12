@@ -4,9 +4,9 @@ LABEL maintainer="contact@baptistemrt.fr"
 
 WORKDIR /usr/src/
 
-ENV PATH /usr/src/node_modules/.bin:$PATH
-ADD package.json /usr/src/package.json
+#ENV PATH /usr/src/node_modules/.bin:$PATH
+#ADD package.json /usr/src/package.json
 
-RUN npm install
+RUN npm install -g serve
 
-CMD ["npm", "start"]
+CMD ["serve", "-s", "build"]
