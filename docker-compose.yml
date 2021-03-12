@@ -1,0 +1,33 @@
+version: '3.5'
+
+services:
+  server:
+    build: ./server
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+    volumes:
+      - ./server/:/usr/src/
+      - ./server/package.json:/usr/src/package.json
+      - /usr/src/node_modules
+    networks:
+      - socket-time
+
+  app:
+    build: ./app
+    ports:
+      - ${APP_PORT}:3000
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+      APP_PORT: ${APP_PORT}
+    volumes:
+      - ./app/:/usr/src/
+      - ./app/package.json:/usr/src/package.json
+      - /usr/src/node_modules
+    networks:
+      - socket-time
+
+networks:
+  socket-time:
+    name: socket-time
